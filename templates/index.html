@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management</title>
+</head>
+<body>
+    <h2>Student Management System</h2>
+
+    <!-- Add Student Form -->
+    <h3>Add Student</h3>
+    <input type="text" id="add_first_name" placeholder="First Name">
+    <input type="text" id="add_last_name" placeholder="Last Name">
+    <input type="date" id="add_dob">
+    <input type="number" id="add_amount_due" placeholder="Amount Due">
+    <button onclick="addStudent()">Add Student</button>
+
+    <!-- Update Student Form -->
+    <h3>Update Student</h3>
+    <input type="number" id="update_student_id" placeholder="Student ID">
+    <input type="text" id="update_first_name" placeholder="New First Name">
+    <input type="text" id="update_last_name" placeholder="New Last Name">
+    <input type="date" id="update_dob">
+    <input type="number" id="update_amount_due" placeholder="New Amount Due">
+    <button onclick="updateStudent()">Update Student</button>
+
+    <!-- Delete Student Form -->
+    <h3>Delete Student</h3>
+    <input type="number" id="delete_student_id" placeholder="Student ID">
+    <button onclick="deleteStudent()">Delete Student</button>
+
+    <h3>All Students</h3>
+    <button onclick="fetchStudents()">Refresh List</button>
+    <ul id="student-list"></ul>
+
+    <script>
+        const API_URL = "http://127.0.0.1:5000/students";
+
+        // Fetch students
+        function fetchStudents() {
+            fetch(API_URL)
+                .then(response => response.json())
+                .then(data => {
+                    const studentList = document.getElementById("student-list");
+                    studentList.innerHTML = "";
+                    data.forEach(student => {
+                        studentList.innerHTML += `
+                            <li>
+                                ID: ${student.student_id} - ${student.first_name} ${student.last_name}, DOB: ${student.dob}, Amount Due: ${student.amount_due}
+                            </li>
+                        `;
+                    });
+                });
+        }
+
+        // Add student
+        function addStudent() {
+            const studentData = {
+                first_name: document.getElementById("add_first_name").value,
+                last_name: document.getElementById("add_last_name").value,
+                dob: document.getElementById("add_dob").value,
+                amount_due: document.getElementById("add_amount_due").value
+            };
+            fetch(API_URL, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(studentData)
+            }).then(() => {
+                fetchStudents();
+                alert("Student added successfully!");
+            });
+        }
+
+        // Update student details
+        function updateStudent() {
+            const studentId = document.getElementById("update_student_id").value;
+            const studentData = {
+                first_name: document.getElementById("update_first_name").value,
+                last_name: document.getElementById("update_last_name").value,
+                dob: document.getElementById("update_dob").value,
+                amount_due: document.getElementById("update_amount_due").value
+            };
+            fetch(`${API_URL}/${studentId}`, {
+                method: "PUT",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(studentData)
+            }).then(() => {
+                fetchStudents();
+                alert("Student details updated!");
+            });
+        }
+
+        // Delete student
+        function deleteStudent() {
+            const studentId = document.getElementById("delete_student_id").value;
+            fetch(`${API_URL}/${studentId}`, { method: "DELETE" })
+                .then(() => {
+                    fetchStudents();
+                    alert("Student deleted successfully!");
+                });
+        }
+
+        fetchStudents(); // Load students on page load
+    </script>
+</body>
+</html>
